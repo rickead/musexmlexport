@@ -813,11 +813,11 @@ class XmlElementParser:
         return string.strip(self.__data_Text)
         
     def start_element(self, name, attrs, context):
-        print """abstract method, called at the start of an XML element"""
+        print ("""abstract method, called at the start of an XML element""")
         sys.exit(0)
         
     def end_element(self, name, context):
-        print """abstract method, called at the end of an XML element"""
+        print ("""abstract method, called at the end of an XML element""")
         sys.exit(0)
         
     def char_data(self, data, context):
@@ -877,7 +877,7 @@ class SampleBaseElementParser(XmlElementParser):
             self.restoreState(context)
             if context.found_Rhythm:
                 context.setSampleBase(self.getData())
-                print "Sampling rate for rhythm is %s sps..." % (context.sample_Rate)
+                print ("Sampling rate for rhythm is %s sps..." % (context.sample_Rate))
         
 class LeadUnitsPerBitElementParser(XmlElementParser):
     """State for handling the LeadAmplitudeUnitsPerBit element"""
@@ -928,7 +928,7 @@ class WaveformTypeElementParser(XmlElementParser):
             self.restoreState(context)
             if string.find(self.getData(), "Rhythm") >= 0:
                 context.setRhythmFound(1)
-                print "ECG %s object found." % self.getData()
+                print ("ECG %s object found." % self.getData())
             else:
                 context.setRhythmFound(0)
                 
@@ -990,7 +990,7 @@ class WaveformDataElementParser(XmlElementParser):
         if name == self.Tag:
             self.restoreState(context)
             if context.found_Rhythm:
-                print "   Adding data for lead %2s." % context.lead_Id
+                print ("   Adding data for lead %2s." % context.lead_Id)
                 context.addWaveformData(self.getData())
         
     
@@ -1052,7 +1052,7 @@ class MuseXmlParser:
         # Verify that all of the independent leads are accounted for...
         for lead in INDEPENDENT_LEADS:
             if lead not in self.ecg_Leads:
-                print "Error! The XML file is missing data for lead ", lead
+                print ("Error! The XML file is missing data for lead ", lead)
                 sys.exit(-1)
                 
         # Append the data into our huge ZCG buffer in the correct order
@@ -1067,7 +1067,7 @@ class MuseXmlParser:
         std_Leads = set(INDEPENDENT_LEADS)
         header = ("I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6")
         extra_Leads = std_Leads.symmetric_difference(set(self.ecg_Leads))
-        #print "EXTRA LEADS: ", extra_Leads
+        #print ("EXTRA LEADS: ", extra_Leads)
         
         fd = open(file_Name, 'wt')
         if fd:
@@ -1112,9 +1112,9 @@ class MuseXmlParser:
                     if lead in extra_Leads:
                         fd.write("%d, " % int(samples[lead] * self.adu_Gain))
                 fd.write("\n")
-        print "\nCSV file (\"%s\") is generated, with %d columns of ECG signals" % (file_Name, len(header) + len(extra_Leads))
-        print "ECG sampling rate is %d Hz." % self.sample_Rate
-        print "ECG stored in units of %s." % self.units
+        print ("\nCSV file (\"%s\") is generated, with %d columns of ECG signals" % (file_Name, len(header) + len(extra_Leads)))
+        print ("ECG sampling rate is %d Hz." % self.sample_Rate)
+        print ("ECG stored in units of %s." % self.units)
 
 ###############################################################################
 # Functions
@@ -1122,10 +1122,10 @@ class MuseXmlParser:
 # 3 handler functions for the expat parser
 def start_element(name, attrs):
     g_Parser.start_element(name, attrs)
-    #print 'Start element:', name, attrs
+    #print ('Start element:', name, attrs)
 def end_element(name):
     g_Parser.end_element(name)
-    #print 'End element:', name
+    #print ('End element:', name)
 def char_data(data):
     g_Parser.char_data(data)    
 
@@ -1162,11 +1162,11 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
     (options, args) = parser.parse_args();
     
     if options.disp_warranty:
-        print WARRANTY
+        print (WARRANTY)
         sys.exit(0)
         
     if options.disp_GPL:
-        print GNU_GPL
+        print (GNU_GPL)
         sys.exit(0)
     
     if len(args) != 1:
@@ -1175,13 +1175,13 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
     
     g_Parser = MuseXmlParser()
     
-    p = xml.parsers.expat.ParserCreate(encoding='Big5')
+    p = xml.parsers.expat.ParserCreate()
 
     p.StartElementHandler = start_element
     p.EndElementHandler = end_element
     p.CharacterDataHandler = char_data
     
-    print "Parsing XML file \"%s\"" % args[0]
+    print ("Parsing XML file \"%s\"" % args[0])
     # Read the XML file and parse it
     p.ParseFile(open(args[0]))
         
@@ -1193,7 +1193,7 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
     # Write the data to a .CSV file
     g_Parser.writeCSV(base_Name + ".csv")
         
-    print """
+    disclaimerString = """
 ------------------------------------------------------------------------------
 THIS IS NOT A MEDICAL DEVICE, NOR IS IT A GE HEALTHCARE PRODUCT. NEITHER THIS
 TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
@@ -1201,4 +1201,5 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
                           NOT FOR PATIENT USE
                           
 ------------------------------------------------------------------------------
-"""    
+"""
+    print(disclaimerString)
