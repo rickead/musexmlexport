@@ -767,11 +767,12 @@ import sys         # For system information
 import optparse
 import string
 import xml.parsers.expat
+import codecs
 import base64
 import struct
 import array
 import os
-
+import re
 
 # Globals
 # The following are the element tags for the XML document
@@ -810,7 +811,7 @@ class XmlElementParser:
     def getData(self):
         """This method returns the character data that was collected during
         parsing and it strips any leading or trailing whitespace"""
-        return string.strip(self.__data_Text)
+        return self.__data_Text.strip()
         
     def start_element(self, name, attrs, context):
         print ("""abstract method, called at the start of an XML element""")
@@ -893,7 +894,7 @@ class LeadUnitsPerBitElementParser(XmlElementParser):
     def end_element(self, name, context):
         if name == self.Tag:
             self.restoreState(context)
-            context.setAdu(float(string.strip(self.getData())))            
+            context.setAdu(float(self.getData().strip()))            
         
 class LeadUnitsElementParser(XmlElementParser):
     """State for handling the LeadAmplitudeUnits element"""
@@ -909,7 +910,7 @@ class LeadUnitsElementParser(XmlElementParser):
     def end_element(self, name, context):
         if name == self.Tag:
             self.restoreState(context)
-            context.setUnits(string.strip(self.getData()))            
+            context.setUnits(self.getData().strip())            
         
 
 class WaveformTypeElementParser(XmlElementParser):
@@ -926,7 +927,7 @@ class WaveformTypeElementParser(XmlElementParser):
     def end_element(self, name, context):
         if name == self.Tag:
             self.restoreState(context)
-            if string.find(self.getData(), "Rhythm") >= 0:
+            if self.getData().find("Rhythm") >= 0:
                 context.setRhythmFound(1)
                 print ("ECG %s object found." % self.getData())
             else:
@@ -1058,8 +1059,8 @@ class MuseXmlParser:
         # Append the data into our huge ZCG buffer in the correct order
         for t in range(0,n,2):
             for lead in self.ecg_Leads:
-                    sample = struct.unpack("h", self.ecg_Data[lead][t] + self.ecg_Data[lead][t+1])
-                    self.zcg.append(sample[0])        
+                sample = struct.unpack("h", self.ecg_Data[lead][t:t+2])
+                self.zcg.append(sample[0])        
                                 
     def writeCSV(self, file_Name):
         """This function writes the ZCG buffer to a CSV file. All 12 or 15 leads
@@ -1127,7 +1128,24 @@ def end_element(name):
     g_Parser.end_element(name)
     #print ('End element:', name)
 def char_data(data):
-    g_Parser.char_data(data)    
+    g_Parser.char_data(data)
+
+def read_encoding(xmlFileName):
+    fid = open(xmlFileName, 'rb')
+    if fid:
+        pattern = "\\<\\?xml\\s+.*encoding=\"([\w-]+)\"\\?\\>"
+        # print("pattern:", pattern)
+
+        for bytes_data in fid.readlines():
+            line = "".join(map(chr, bytes_data))
+            #print("line:", line)
+
+            result = re.match(pattern, line)
+            if result:
+                print ("encoding is ", result.group(1))
+                return result.group(1)
+
+    return ""
 
 ###############################################################################
 # Main program
@@ -1157,6 +1175,7 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
 
     # parse the options
     parser = optparse.OptionParser(usage=USAGE, version=VERSION, description=DESCRIPTION)
+    parser.add_option("-e", action="store", type="string", dest="encoding", help="Specify the file encoding for the file.")
     parser.add_option("-w", action="store_true", dest="disp_warranty", help="This option displays the warranty information for this open source program")
     parser.add_option("-c", action="store_true", dest="disp_GPL", help="This option displays the GNU General Public License, with its terms and conditions.")
     (options, args) = parser.parse_args();
@@ -1171,8 +1190,9 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
     
     if len(args) != 1:
         parser.error("Invalid number of command-line parameters")
-        
-    
+
+    fileEncoding = options.encoding
+
     g_Parser = MuseXmlParser()
     
     p = xml.parsers.expat.ParserCreate()
@@ -1182,9 +1202,18 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
     p.CharacterDataHandler = char_data
     
     print ("Parsing XML file \"%s\"" % args[0])
+
+    # Automatically determine the encoding of XML file
+    if not fileEncoding:
+        fileEncoding = read_encoding(args[0])
+        if len(fileEncoding) == 0:
+            print("ERROR: Cannot determine file encoding from XML file!")
+            sys.exit(1)
+
     # Read the XML file and parse it
-    p.ParseFile(open(args[0]))
-        
+    f = codecs.open(args[0], mode='r', encoding=fileEncoding)
+    p.Parse(f.read())
+
     # convert the data into a ZCG buffer
     g_Parser.makeZcg()
     
