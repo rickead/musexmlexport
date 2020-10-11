@@ -753,8 +753,8 @@ Public License instead of this License.  But first, please read
 # Information about the program
 ###############################################################################
 __author__ = "Anthony D. Ricke"
-__date__ = "03 Oct 2009"
-__version__ = "0.2.0"
+__date__ = "05 Oct 2009"
+__version__ = "0.3.0"
 __credits__ = "Guido van Rossum, for the Python language"
 __copyright__ = "Copyright (C) 2009  GE Healthcare"
 
