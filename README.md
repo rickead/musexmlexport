@@ -1,7 +1,7 @@
 # PROJECT: musexmlexport
 A utility to extract an ECG rhythm strip from a MUSE(R) XML file. It converts MUSE XML files to CSV files, suitable for import into Excel and MATLAB.
 
-This program is is written for use with **Python 2**.
+This program is is written for use with **Python 3**, since version 0.3.0.
 
 ## Copyright Information
 Copyright 2009 GE Healthcare
@@ -20,7 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program (it is embedded in the text of this script).
 If not, see <http://www.gnu.org/licenses/>.
 
-You may contact the author by e-mail (anthony.ricke@med.ge.com). For updates to this software, please visit the
+You may contact the author by e-mail (anthony.ricke@gmail.com). For updates to this software, please visit the
 Source Forge project site (http://sourceforge.net/projects/musexmlexport/)
 
 - MUSE is a registered trademark of GE Healthcare, Inc.
