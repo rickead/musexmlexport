@@ -29,6 +29,7 @@ Source Forge project site (http://sourceforge.net/projects/musexmlexport/)
 
 - Version 0.1, Initial release, A. Ricke, 23 July 2009
 - Version 0.2, Updated version 3.0 of the GNU General Public License and loaded code into GitHub, A. Ricke, 3 October, 2020
+- Version 0.3, Updated the script to work with Python 3 and to automatically read the encoding from the file and use that encoding to import the XML file. A. Ricke 11 Oct 2020.
 
 # CONTENTS
 A listing of the MUSE XML Export contents is:
@@ -40,11 +41,12 @@ A listing of the MUSE XML Export contents is:
 # PREPARATION
 
 The 'musexmlex.py' script is a Python script; hence, the Python engine must be
-installed before using the script. This script was verified using version 2.5.2.
+installed before using the script. This script was verified using version 3.7.2.
+
 See www.python.org for information about installing Python on your target 
 machine.
 
-After installation, make sure 'python.exe' is in your system path before 
+After installation, make sure 'python3.exe' is in your system path before 
 continuing.
 
 ## USE
